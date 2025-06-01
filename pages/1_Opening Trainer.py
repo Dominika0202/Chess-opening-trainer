@@ -1,30 +1,35 @@
 ## LOAD THE PACKAGES
 import streamlit as st
-import chess
+from pathlib import Path
 import chess.svg
 import chess
-import polars as pl
 import pandas as pd
 from typing import List
 import altair as alt
 
+
 # -----------------------------------------------------------------------------
 # 0. PAGE CONFIGURATIONS
 # -----------------------------------------------------------------------------
-st.title("🧠 Chess Opening Trainer")
+st.title("Chess Opening Trainer")
 
 tab_titles = ["Easy version", "Hard Version"]
 tab_easy, tab_hard = st.tabs(tab_titles)
 
 # LOAD THE DATASET
 @st.cache_resource # Note: for simple file loading, @st.cache_data is often preferred
-def load_data_resource(file_path, sep = ";", n_rows = None):
+
+def load_data_resource(file_path, sep=";", n_rows=None):
     print(f"Cache miss: Loading data resource from {file_path}...")
-    df = pd.read_csv(file_path, sep = sep, nrows = n_rows)
+    df = pd.read_csv(file_path, sep=sep, nrows=n_rows)
     return df
 
-file = "games_clean.csv"
+# Get the path to the directory where this script is located
+base_path = Path(__file__).resolve().parent
+file = base_path / "data" / "games_clean.csv"
+
 df = load_data_resource(file)
+
 
 #### smaller test_df for now
 test_df = df.head(100_000)
@@ -201,7 +206,7 @@ with tab_easy:
             last_move = st.session_state.board.move_stack[-1]
 
         board_svg = get_board_svg(st.session_state.board, last_move=last_move, size=500)
-        st.image(board_svg, use_column_width=True)
+        st.image(board_svg, use_container_width=True)
 
 #------ 2.2 MOVE INPUT ------
         user_move_san = st.text_input("Enter your move:", key= "move_input", placeholder="e.g. e4, d4, Nf3")
@@ -301,7 +306,7 @@ with tab_hard:
             last_move_fen = st.session_state.board_fen.move_stack[-1]
 
         board_svg_fen = get_board_svg(st.session_state.board_fen, last_move=last_move_fen, size=500)
-        st.image(board_svg_fen, use_column_width=True)
+        st.image(board_svg_fen, use_container_width=True)
 
 #------ 3.2 MOVE INPUT ------
         user_move_san_fen = st.text_input("Enter your move:", key= "move_input_fen", placeholder="e.g. e4, d4, Nf3")
