@@ -6,19 +6,8 @@ import altair as alt
 # we set page title
 st.title("Statistics")
 
-# function to load data, return is cached for speed
-@st.cache_resource
-def load_data(file_path, sep=";", n_rows=None):
-    df = pd.read_csv(file_path, sep=sep, nrows=n_rows)
-    return df
-
-# get script location and load data
-base_path = Path(__file__).resolve().parent
-file = base_path / "data" / "games_clean.csv"
-df = load_data(file)
-
-# limit to first 50k games to avoid memory issues
-df = df.head(50_000)
+# function to load data
+df = st.session_state.df
 
 # check if movelist exists, if not make sure moves is a string then convert to list via split
 if "MoveList" not in df.columns:
