@@ -22,14 +22,14 @@ black_to_move_fens = st.session_state.black_to_move_fens
 # 1. FUNCTIONS
 # -----------------------------------------------------------------------------
 # ------ 1.1 GENERAL FUNCTIONS ------
-def get_board_svg(board, last_move = None, size = 500):
+def get_board_svg(board, last_move = None, size = 500, orientation = chess.WHITE):
     """
     Generates an SVG image of the chess board.
     """
     if last_move:
         #visualizes the last move
-        return chess.svg.board(board = board, lastmove = last_move, size = size)
-    return chess.svg.board(board = board, size = size)
+        return chess.svg.board(board = board, lastmove = last_move, size = size, orientation = orientation)
+    return chess.svg.board(board = board, size = size, orientation = orientation)
 
 def list_to_move_str(move_list):
     """
@@ -122,7 +122,7 @@ def filter_data_move_str(df, move_str):
     return filtered
 
 # ------ 1.3 ADVANCED IMPLEMENTATION (FEN) FUNCTIONS ------
-def next_move_id_fen(fen_moves: list[str], target_fen):
+def next_move_id_fen(fen_moves, target_fen):
         try:
             id = fen_moves.index(target_fen) + 1
             n = id//2 + 1
@@ -133,7 +133,7 @@ def next_move_id_fen(fen_moves: list[str], target_fen):
         except ValueError:
             return None
 
-def find_games_fen(df: pd.DataFrame, board) -> pd.DataFrame:
+def find_games_fen(df, board):
     """
     Return all games in df whose move-history reached the same
     board position as on the board. Return also the next move information for each match.
@@ -186,6 +186,8 @@ if 'board' not in st.session_state:
     st.session_state.board = chess.Board() # Initialize a new chess board
 if 'move_history_san' not in st.session_state:
     st.session_state.move_history_san = [] # To store moves in Standard Algebraic Notation (SAN)
+if 'orientation' not in st.session_state:
+    st.session_state.orientation = chess.WHITE
 
 #initialize the move string
 moves_str = ""
@@ -200,12 +202,19 @@ with tab_easy:
 
     with col_board:
         st.subheader("Current Position")
-
+        
+        #flip board button
+        if st.button("Flip Board", key="flip"):
+            # Check the current state and set it to the opposite
+            if st.session_state.orientation == chess.WHITE:
+                st.session_state.orientation = chess.BLACK
+            else:
+                st.session_state.orientation = chess.WHITE
         #show the svg board
         last_move = None
         if st.session_state.board.move_stack: #if a move has been played
             last_move = st.session_state.board.move_stack[-1]
-        board_svg = get_board_svg(st.session_state.board, last_move=last_move, size=500)
+        board_svg = get_board_svg(st.session_state.board, last_move = last_move, size = 500, orientation = st.session_state.orientation)
         st.image(board_svg, use_container_width=True)
 
 #------ 2.2 MOVE INPUT ------
@@ -246,8 +255,8 @@ with tab_easy:
         st.button("Reset Board", key = "Reset", use_container_width = True, on_click=reset_board)
 
         #------ 2.2.1 BEST GAMES DF ------
-        st.write("**Explore the best games**")
-        st.dataframe(top_games(df, st.session_state.board))
+        st.write("**Explore games by top players**")
+        st.dataframe(top_games(df, st.session_state.board), key = "data_frame")
 
 #------ 2.3 INFO COLUMN ------
     with col_info:
@@ -257,7 +266,7 @@ with tab_easy:
         st.write("**Move History:**")
         if st.session_state.move_history_san:
             moves_str = list_to_move_str(st.session_state.move_history_san)
-            st.text_area("Played Moves", value=moves_str, height=150, disabled= True)
+            st.text_area("Played Moves", value=moves_str, height=150, key = "Played_Moves", disabled= True)
         else:
             st.info("No moves played yet.")
         st.write("---")
@@ -299,6 +308,8 @@ if 'board_fen' not in st.session_state:
     st.session_state.board_fen = chess.Board() # Initialize a new chess board
 if 'move_history_san_fen' not in st.session_state:
     st.session_state.move_history_san_fen = [] # To store moves in Standard Algebraic Notation
+if 'orientation_fen' not in st.session_state:
+    st.session_state.orientation_fen = chess.WHITE
 
 #Initialize the move string
 moves_str_fen = ""
@@ -315,12 +326,20 @@ with tab_hard:
     with col_board_fen:
         st.subheader("Current Position")
 
+        #flip board button
+        if st.button("Flip Board", key="flip_fen"):
+            # Check the current state and set it to the opposite
+            if st.session_state.orientation_fen == chess.WHITE:
+                st.session_state.orientation_fen = chess.BLACK
+            else:
+                st.session_state.orientation_fen = chess.WHITE
+
         # Display the current board SVG
         last_move_fen = None
         if st.session_state.board_fen.move_stack: #if a move has been played
             last_move_fen = st.session_state.board_fen.move_stack[-1]
 
-        board_svg_fen = get_board_svg(st.session_state.board_fen, last_move = last_move_fen, size = 500)
+        board_svg_fen = get_board_svg(st.session_state.board_fen, last_move = last_move_fen, size = 500, orientation = st.session_state.orientation_fen)
         st.image(board_svg_fen, use_container_width = True)
 
 #------ 3.2 MOVE INPUT ------
@@ -355,8 +374,8 @@ with tab_hard:
         st.button("Reset Board", key = "Reset_fen", use_container_width = True, on_click = reset_board_fen)
 
         #------ 3.2.1 BEST GAMES DF ------
-        st.write("**Explore the best games**")
-        st.dataframe(top_games(df, st.session_state.board_fen))
+        st.write("**Explore games by top players**")
+        st.dataframe(top_games(df, st.session_state.board_fen), key = "data_frame_fen")
 
 #------ 3.3 INFO COLUMN ------
     with col_info_fen:
@@ -366,7 +385,7 @@ with tab_hard:
         st.write("**Move History:**")
         if st.session_state.move_history_san_fen:
             moves_str_fen = list_to_move_str(st.session_state.move_history_san_fen)
-            st.text_area("Played Moves", value=moves_str_fen, height=150, disabled= True)
+            st.text_area("Played Moves", value=moves_str_fen, key = "Played_Moves_fen",height=150, disabled= True)
         else:
             st.info("No moves played yet.")
         st.write("---")    
