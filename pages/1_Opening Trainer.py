@@ -56,7 +56,10 @@ def next_move_san(move_str, id = None):
         move_n += 1
     else:
         move_n += 2
-    return move_str.split()[move_n]
+    try:
+        return move_str.split()[move_n]
+    except IndexError:
+        return None
 
 def next_move_id(move_str):
     """
@@ -195,7 +198,7 @@ moves_str = ""
 # ------ 2.1 PAGE LAYOUT ------
 with tab_easy:
     st.header("Direct Opening Trainer")
-    st.write("This version provides statistics for the exact move-by-move line you've played. Note that if you reach the same position via a different move order, the results will be different.")
+    st.write("This version provides statistics for the exact move-by-move line you've played. Note that if you reach the same position through a different move order, the results can be different.")
     st.write("Enter moves (e.g., `e4`, `Nf3`, `O-O`). The board will update, and you'll see insights.")
 
     col_board, col_info = st.columns([3, 2]) # Separates the page: Board takes 3/5 width, info 2/5
@@ -235,7 +238,7 @@ with tab_easy:
                     st.session_state.move_input = ""
 
                 except ValueError as e:
-                    st.error(f"Invalid move: '{user_move}'. Reason: '{e}'")
+                    st.error(f"Invalid move: '{user_move}'.")
             else:
                 st.warning("Please enter a move to play.")
 
@@ -254,11 +257,7 @@ with tab_easy:
 
         st.button("Reset Board", key = "Reset", use_container_width = True, on_click=reset_board)
 
-        #------ 2.2.1 BEST GAMES DF ------
-        st.write("**Explore games by top players**")
-        st.dataframe(top_games(df, st.session_state.board), key = "data_frame")
-
-#------ 2.3 INFO COLUMN ------
+#------ 2.3 POSITION INSIGHTS ------
     with col_info:
         st.subheader("Position Insights")
 
@@ -277,6 +276,7 @@ with tab_easy:
             move_counts_df = get_popular_next_moves(filtered_df)
             common_openings = get_common_openings(filtered_df)
         else:
+            filtered_df = df
             move_counts_df, common_openings = st.session_state.stats_initialization
 
         #------ 2.3.2 POPULAR NEXT MOVES ------
@@ -297,6 +297,11 @@ with tab_easy:
 
         st.markdown("---")
 
+        #------ 2.3.4 BEST GAMES DF ------
+    with col_board:
+        st.write("**Top Player Games from this Position**")
+        st.write("Copy the link and see the full game")
+        st.dataframe(top_games(filtered_df, st.session_state.board), key = "data_frame")
 # -----------------------------------------------------------------------------
 # 3. OPENING TRAINER FEN (HARD) TAB
 # -----------------------------------------------------------------------------
@@ -317,8 +322,8 @@ moves_str_fen = ""
 # ------ 3.1 PAGE LAYOUT ------
 with tab_hard:
     st.header("Advanced Opening Trainer")
-    st.write("This version analyzes the board based on the current position, not the move order. It finds all games that reached this exact setup, even through a different sequence of moves. This gives you the most accurate insights into the position's popularity and best continuations.")
-    st.write("Because this search is more computationally intensive, it can be slightly slower. **Please note:** This advanced analysis is available for positions within the first 20 moves of a game.")
+    st.write("This version analyzes the board based on the current position, not the move order. It finds all games that reached this exact setup, even through a different sequence of moves. This gives you the most accurate insights into the position.")
+    st.write("Because this version is more computationally intensive, it can be slightly slower. **Please note:** This advanced analysis is available for positions within the first 20 moves of a game.")
     st.write("Enter moves (e.g., `e4`, `Nf3`, `O-O`). The board will update, and you'll see insights.")
 
     col_board_fen, col_info_fen = st.columns([3, 2]) # Separates the page: Board takes 3/5 width, info 2/5
@@ -373,11 +378,7 @@ with tab_hard:
 
         st.button("Reset Board", key = "Reset_fen", use_container_width = True, on_click = reset_board_fen)
 
-        #------ 3.2.1 BEST GAMES DF ------
-        st.write("**Explore games by top players**")
-        st.dataframe(top_games(df, st.session_state.board_fen), key = "data_frame_fen")
-
-#------ 3.3 INFO COLUMN ------
+#------ 3.3 POSITION INSIGHTS ------
     with col_info_fen:
         st.subheader("Position Insights")
 
@@ -396,6 +397,7 @@ with tab_hard:
             move_counts_df_fen = get_popular_next_moves(filtered_df_fen)
             common_openings_fen = get_common_openings(filtered_df_fen)
         else:
+            filtered_df_fen = df
             move_counts_df_fen, common_openings_fen = st.session_state.stats_initialization
 
 
@@ -416,3 +418,9 @@ with tab_hard:
                 st.write(f"{i + 1}. {opening}")
 
         st.markdown("---")
+    
+    with col_board_fen:
+         #------ 3.3.4 BEST GAMES DF ------
+        st.write("**Top Player Games from this Position**")
+        st.write("Copy the link and see the full game")
+        st.dataframe(top_games(filtered_df_fen, st.session_state.board_fen), key = "data_frame_fen")

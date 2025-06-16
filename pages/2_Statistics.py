@@ -226,9 +226,9 @@ with tab_termination:
     # setting tab header
     st.header("Termination Types")
     st.markdown("""
-    This chart shows the most common termination reasons recorded in games.  
-    Typical termination types include checkmate, resignation, timeout, and various draw rules.  
-    The top 10 most frequent reasons are displayed here.
+    This chart shows the counts of termination reasons recorded in games.  
+    Termination types include normal (e.g. checkmate, resignation, and various draw rules) and timeout.  
+    The counts are displayed here.
     """)
 
     # new df to count terminations
@@ -245,7 +245,7 @@ with tab_termination:
             x="Count",
             tooltip=["Termination", "Count"]
         )
-        .properties(title="Top 10 Termination Reasons")
+        .properties(title="Termination Reasons")
     )
     st.altair_chart(chart_termination, use_container_width=True)
 
@@ -255,7 +255,7 @@ with tab_timecontrols:
     # setting tab header
     st.header("Time Controls")
     st.markdown("""
-    This chart displays the top 10 most frequently used time controls in the dataset.  
+    This chart displays the most frequently used time controls in the dataset.  
     Time controls indicate the pace of the game, such as blitz, rapid, or classical formats.  
     Each bar shows how often a given time control occurred across all games.
     """)
@@ -274,6 +274,6 @@ with tab_timecontrols:
             x="Count",
             tooltip=["TimeControl", "Count"]
         )
-        .properties(title="Top 10 Time Controls")
+        .properties(title="Time Controls")
     )
     st.altair_chart(chart_timecontrols, use_container_width=True)
