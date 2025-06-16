@@ -1,9 +1,8 @@
 import streamlit as st
-from pathlib import Path
 import pandas as pd
 import altair as alt
 
-# we set page title
+# we set page title`
 st.title("Statistics")
 
 # function to load data
@@ -37,6 +36,11 @@ stats_tabs = [
 with tab_elo:
     # setting tab header
     st.header("ELO Distribution")
+    st.markdown("""
+    This chart displays the overall distribution of player Elo ratings in the dataset.  
+    Both White and Black Elo values are combined into a single histogram, allowing us to look at overall player rating.  
+    The bars represent how frequently different Elo ranges occur among all players.
+    """)
 
     # new df containing elo regardless of side
     elo_df = pd.concat([df['WhiteElo'], df['BlackElo']]).dropna()
@@ -58,6 +62,11 @@ with tab_elo:
 with tab_openings:
     # tab header
     st.header("Openings Popularity")
+    st.markdown("""
+    This chart shows the 25 most commonly played chess openings in the dataset.  
+    It is based on the frequency of the `Opening` label recorded for each game.  
+    This can be used to identify which openings are most common in the dataset.
+    """)
 
     # new df containing info about occurrence count of each opening
     opening_counts = df["Opening"].value_counts().reset_index()
@@ -83,6 +92,14 @@ with tab_results:
 
     # setting tab header
     st.header("Game Results")
+    st.markdown("""
+    This pie chart breaks down the distribution of game outcomes:  
+    - `1-0` indicates a White win  
+    - `0-1` indicates a Black win  
+    - `1/2-1/2` indicates a draw  
+
+    Each slice represents the proportion of games with that result, helping visualize outcomes.
+    """)
 
     # new df counting each result occurrence
     result_counts = df["Result"].value_counts().reset_index()
@@ -106,6 +123,11 @@ with tab_duration:
 
     # setting tab header
     st.header("Game Duration")
+    st.markdown("""
+    This histogram shows the distribution of game lengths, measured in number of moves.  
+    Each bar represents how many games fell into a certain move-count range.  
+    The `MoveList` column is used to compute the number of moves per game.
+    """)
 
     # new column to count moves
     df["MoveCount"] = df["MoveList"].apply(len)
@@ -128,6 +150,17 @@ with tab_winrate:
 
     # setting tab header
     st.header("Win Rate by Opening")
+    st.markdown("""
+    This section analyzes the performance of each opening in terms of win rates.  
+    We calculate the percentage of games won by White, by Black, and that ended in a draw, for each opening.
+
+    You can:
+    - Filter to include only openings with a minimum number of games (for reliability).
+    - Sort the openings by win rate of either White or Black.
+    - Adjust how many top openings to display in the bar chart.
+
+    These stats help identify which openings tend to be more successful for each side.
+    """)
 
     # 4 new dfs detailing occurrence of each opening in total and depending on result
     opening_total = df["Opening"].value_counts().rename_axis("Opening").reset_index(name="TotalGames")
@@ -192,6 +225,11 @@ with tab_termination:
 
     # setting tab header
     st.header("Termination Types")
+    st.markdown("""
+    This chart shows the most common termination reasons recorded in games.  
+    Typical termination types include checkmate, resignation, timeout, and various draw rules.  
+    The top 10 most frequent reasons are displayed here.
+    """)
 
     # new df to count terminations
     term_counts = df["Termination"].value_counts().reset_index()
@@ -216,6 +254,11 @@ with tab_timecontrols:
 
     # setting tab header
     st.header("Time Controls")
+    st.markdown("""
+    This chart displays the top 10 most frequently used time controls in the dataset.  
+    Time controls indicate the pace of the game, such as blitz, rapid, or classical formats.  
+    Each bar shows how often a given time control occurred across all games.
+    """)
 
     # new df to count each occurrence of time control
     tc_counts = df["TimeControl"].value_counts().reset_index()
